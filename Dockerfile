@@ -45,4 +45,6 @@ RUN R --quiet -e "devtools::install_github('IRkernel/IRkernel')" && \
 RUN R -e "install.packages(c('e1071', 'kableExtra', 'ggmap', 'Rtsne', 'NbClust', 'tree', 'maptree', 'glmnet', 'randomForest', 'ROCR', 'imager', 'ISLR', 'ggridges', 'plotmo'), repos = 'http://cran.us.r-project.org')" &&\
     R - e "devtools::install_github("gbm-developers/gbm3")"
 
+RUN pip install jupyterhub==0.9.4
+
 CMD jupyter notebook --ip 0.0.0.0
