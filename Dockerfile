@@ -1,4 +1,4 @@
-FROM rocker/verse:3.4.3
+FROM rocker/verse:3.5.1
 
 ENV NB_USER rstudio
 ENV NB_UID 1000
