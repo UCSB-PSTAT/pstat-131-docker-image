@@ -50,4 +50,5 @@ RUN wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stac
     wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start-notebook.sh && \
     chmod a+x /usr/local/bin/start*.sh
 
+
 CMD jupyter notebook --ip 0.0.0.0
