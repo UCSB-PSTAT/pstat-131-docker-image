@@ -51,4 +51,39 @@ RUN wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stac
     chmod a+x /usr/local/bin/start*.sh
 
 
+# Extra stuff for pstat 115
+# Install essentials
+USER root
+
+RUN apt-get update && \
+    apt-get -y install clang && \
+    apt-get purge && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Global site-wide config
+RUN mkdir -p $HOME/.R/ \
+    && echo "\nCXX=clang++ -ftemplate-depth-256\n" >> $HOME/.R/Makevars \
+    && echo "CC=clang\n" >> $HOME/.R/Makevars
+
+# Install rstan
+RUN install2.r --error \
+    inline \
+    RcppEigen \
+    StanHeaders \
+    rstan \
+    KernSmooth
+
+# Config for rstudio user
+RUN mkdir -p /home/rstudio/.R/ \
+    && echo "\nCXX=clang++ -ftemplate-depth-256\n" >> /home/rstudio/.R/Makevars \
+    && echo "CC=clang\n" >> /home/rstudio/.R/Makevars \
+    && echo "CXXFLAGS=-O3\n" >> /home/rstudio/.R/Makevars \
+    && echo "\nrstan::rstan_options(auto_write = TRUE)" >> /home/rstudio/.Rprofile \
+    && echo "options(mc.cores = parallel::detectCores())" >> /home/rstudio/.Rprofile
+
+RUN R -e "install.packages(c('rstanarm', 'coda', 'mvtnorm', 'loo', 'MCMCpack'), repos = 'http://cran.us.r-project.org')" && \
+    R -e "devtools::install_github('rmcelreath/rethinking')"
+
+USER ${NB_USER}
 CMD jupyter notebook --ip 0.0.0.0
