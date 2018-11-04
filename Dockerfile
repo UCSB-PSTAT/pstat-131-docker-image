@@ -85,13 +85,13 @@ RUN mkdir -p /home/rstudio/.R/ \
 RUN R -e "install.packages(c('rstanarm', 'coda', 'mvtnorm', 'loo', 'MCMCpack'), repos = 'http://cran.us.r-project.org')" && \
     R -e "devtools::install_github('rmcelreath/rethinking')"
 
-RUN R -e "install.packages(c('hflights', 'tidytext'), repos = 'http://cran.us.r-project.org')" && \
-    R -e "devtools::install_github('bradleyboehmke/harrypotter')"
-
+RUN R -e "install.packages(c('hflights', 'tidytext', 'HDInterval'), repos = 'http://cran.us.r-project.org')" && \
+    R -e "devtools::install_github('bradleyboehmke/harrypotter')" && \
+    R -e "devtools::install_github('rlbarter/superheat')"
+    
 USER root
+RUN tlmgr update --self
 RUN tlmgr install float mathtools
-
-RUN R -e "devtools::install_github('rlbarter/superheat')"
 
 USER ${NB_USER}
 CMD jupyter notebook --ip 0.0.0.0
