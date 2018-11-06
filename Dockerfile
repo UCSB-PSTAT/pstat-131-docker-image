@@ -85,7 +85,7 @@ RUN mkdir -p /home/rstudio/.R/ \
 RUN R -e "install.packages(c('rstanarm', 'coda', 'mvtnorm', 'loo', 'MCMCpack'), repos = 'http://cran.us.r-project.org')" && \
     R -e "devtools::install_github('rmcelreath/rethinking')"
 
-RUN R -e "install.packages(c('hflights', 'tidytext', 'HDInterval'), repos = 'http://cran.us.r-project.org')" && \
+RUN R -e "install.packages(c('hflights', 'tidytext', 'HDInterval', 'dendextend'), repos = 'http://cran.us.r-project.org')" && \
     R -e "devtools::install_github('bradleyboehmke/harrypotter')" && \
     R -e "devtools::install_github('rlbarter/superheat')"
     
