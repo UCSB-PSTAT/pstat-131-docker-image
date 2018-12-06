@@ -92,6 +92,14 @@ RUN R -e "install.packages(c('hflights', 'tidytext', 'HDInterval', 'dendextend')
 USER root
 RUN tlmgr update --self
 RUN tlmgr install float mathtools
+RUN tlmgr update --self
+RUN tlmgr install collection-latexextra
+
+
+RUN echo "* soft core 0" >> /etc/security/limits.conf \
+    && echo "* hard core 0" >> /etc/security/limits.conf 
+
+RUN echo "ulimit -c 0 > /dev/null 2>&1" > /etc/profile.d/disable-coredumps.sh
 
 USER ${NB_USER}
 CMD jupyter notebook --ip 0.0.0.0
