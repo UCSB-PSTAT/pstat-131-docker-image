@@ -7,4 +7,3 @@ For testing run:
 First port is localhost port.
 
 https://docs.docker.com/docker-cloud/builds/automated-build/
-
