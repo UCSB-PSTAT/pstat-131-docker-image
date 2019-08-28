@@ -39,20 +39,20 @@ RUN python3 -m venv ${VENV_DIR} && \
     jupyter nbextension install    --sys-prefix --py nbrsessionproxy && \
     jupyter nbextension enable     --sys-prefix --py nbrsessionproxy
 
-## RUN R --quiet -e "devtools::install_github('IRkernel/IRkernel')" && \
-##     R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')"
-## 
-## RUN R -e "install.packages(c('e1071', 'kableExtra', 'ggmap', 'Rtsne', 'NbClust', 'tree', 'maptree', 'glmnet', 'randomForest', 'ROCR', 'imager', 'ISLR', 'ggridges', 'plotmo'), repos = 'http://cran.us.r-project.org')" && \
-##     R -e "devtools::install_github('gbm-developers/gbm3')"
-##     
-## RUN wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start.sh && \
-##     wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start-singleuser.sh && \
-##     wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start-notebook.sh && \
-##     chmod a+x /usr/local/bin/start*.sh
-## 
-## 
-## # Extra stuff for pstat 115
-## # Install essentials
+RUN R --quiet -e "devtools::install_github('IRkernel/IRkernel')" && \
+    R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')"
+
+RUN R -e "install.packages(c('e1071', 'kableExtra', 'ggmap', 'Rtsne', 'NbClust', 'tree', 'maptree', 'glmnet', 'randomForest', 'ROCR', 'imager', 'ISLR', 'ggridges', 'plotmo'), repos = 'http://cran.us.r-project.org')" && \
+    R -e "devtools::install_github('gbm-developers/gbm3')"
+    
+RUN wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start.sh && \
+    wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start-singleuser.sh && \
+    wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start-notebook.sh && \
+    chmod a+x /usr/local/bin/start*.sh
+
+
+# Extra stuff for pstat 115
+# Install essentials
 ## USER root
 ## 
 ## RUN apt-get update && \
