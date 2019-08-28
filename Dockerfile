@@ -53,19 +53,19 @@ RUN wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stac
 
 # Extra stuff for pstat 115
 # Install essentials
-## USER root
-## 
-## RUN apt-get update && \
-##     apt-get -y install clang && \
-##     apt-get purge && \
-##     apt-get clean && \
-##     rm -rf /var/lib/apt/lists/*
-## 
-## # Global site-wide config
-## RUN mkdir -p $HOME/.R/ \
-##     && echo "\nCXX=clang++ -ftemplate-depth-256\n" >> $HOME/.R/Makevars \
-##     && echo "CC=clang\n" >> $HOME/.R/Makevars
-## 
+USER root
+
+RUN apt-get update && \
+    apt-get -y install clang && \
+    apt-get purge && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Global site-wide config
+RUN mkdir -p $HOME/.R/ \
+    && echo "\nCXX=clang++ -ftemplate-depth-256\n" >> $HOME/.R/Makevars \
+    && echo "CC=clang\n" >> $HOME/.R/Makevars
+
 ## # Install rstan
 ## RUN install2.r --error \
 ##     inline \
@@ -85,10 +85,10 @@ RUN wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stac
 ## RUN R -e "install.packages(c('rstanarm', 'coda', 'mvtnorm', 'loo', 'MCMCpack'), repos = 'http://cran.us.r-project.org')" && \
 ##     R -e "devtools::install_github('rmcelreath/rethinking')"
 ## 
-## RUN R -e "install.packages(c('hflights', 'tidytext', 'HDInterval', 'dendextend'), repos = 'http://cran.us.r-project.org')" && \
-##     R -e "devtools::install_github('bradleyboehmke/harrypotter')" && \
-##     R -e "devtools::install_github('rlbarter/superheat')"
-##     
+RUN R -e "install.packages(c('hflights', 'tidytext', 'HDInterval', 'dendextend'), repos = 'http://cran.us.r-project.org')" && \
+    R -e "devtools::install_github('bradleyboehmke/harrypotter')" && \
+    R -e "devtools::install_github('rlbarter/superheat')"
+    
 ## USER root
 ## RUN tlmgr update --self
 ## RUN tlmgr install float mathtools
