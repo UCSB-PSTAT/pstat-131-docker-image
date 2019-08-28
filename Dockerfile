@@ -39,67 +39,67 @@ RUN python3 -m venv ${VENV_DIR} && \
     jupyter nbextension install    --sys-prefix --py nbrsessionproxy && \
     jupyter nbextension enable     --sys-prefix --py nbrsessionproxy
 
-RUN R --quiet -e "devtools::install_github('IRkernel/IRkernel')" && \
-    R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')"
-
-RUN R -e "install.packages(c('e1071', 'kableExtra', 'ggmap', 'Rtsne', 'NbClust', 'tree', 'maptree', 'glmnet', 'randomForest', 'ROCR', 'imager', 'ISLR', 'ggridges', 'plotmo'), repos = 'http://cran.us.r-project.org')" && \
-    R -e "devtools::install_github('gbm-developers/gbm3')"
-    
-RUN wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start.sh && \
-    wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start-singleuser.sh && \
-    wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start-notebook.sh && \
-    chmod a+x /usr/local/bin/start*.sh
-
-
-# Extra stuff for pstat 115
-# Install essentials
-USER root
-
-RUN apt-get update && \
-    apt-get -y install clang && \
-    apt-get purge && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Global site-wide config
-RUN mkdir -p $HOME/.R/ \
-    && echo "\nCXX=clang++ -ftemplate-depth-256\n" >> $HOME/.R/Makevars \
-    && echo "CC=clang\n" >> $HOME/.R/Makevars
-
-# Install rstan
-RUN install2.r --error \
-    inline \
-    RcppEigen \
-    StanHeaders \
-    rstan \
-    KernSmooth
-
-# Config for rstudio user
-RUN mkdir -p /home/rstudio/.R/ \
-    && echo "\nCXX=clang++ -ftemplate-depth-256\n" >> /home/rstudio/.R/Makevars \
-    && echo "CC=clang\n" >> /home/rstudio/.R/Makevars \
-    && echo "CXXFLAGS=-O3\n" >> /home/rstudio/.R/Makevars \
-    && echo "\nrstan::rstan_options(auto_write = TRUE)" >> /home/rstudio/.Rprofile \
-    && echo "options(mc.cores = parallel::detectCores())" >> /home/rstudio/.Rprofile
-
-RUN R -e "install.packages(c('rstanarm', 'coda', 'mvtnorm', 'loo', 'MCMCpack'), repos = 'http://cran.us.r-project.org')" && \
-    R -e "devtools::install_github('rmcelreath/rethinking')"
-
-RUN R -e "install.packages(c('hflights', 'tidytext', 'HDInterval', 'dendextend'), repos = 'http://cran.us.r-project.org')" && \
-    R -e "devtools::install_github('bradleyboehmke/harrypotter')" && \
-    R -e "devtools::install_github('rlbarter/superheat')"
-    
-USER root
-RUN tlmgr update --self
-RUN tlmgr install float mathtools
-RUN tlmgr update --self
-RUN tlmgr install collection-latexextra
-
-
-RUN echo "* soft core 0" >> /etc/security/limits.conf \
-    && echo "* hard core 0" >> /etc/security/limits.conf 
-
-RUN echo "ulimit -c 0 > /dev/null 2>&1" > /etc/profile.d/disable-coredumps.sh
+## RUN R --quiet -e "devtools::install_github('IRkernel/IRkernel')" && \
+##     R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')"
+## 
+## RUN R -e "install.packages(c('e1071', 'kableExtra', 'ggmap', 'Rtsne', 'NbClust', 'tree', 'maptree', 'glmnet', 'randomForest', 'ROCR', 'imager', 'ISLR', 'ggridges', 'plotmo'), repos = 'http://cran.us.r-project.org')" && \
+##     R -e "devtools::install_github('gbm-developers/gbm3')"
+##     
+## RUN wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start.sh && \
+##     wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start-singleuser.sh && \
+##     wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start-notebook.sh && \
+##     chmod a+x /usr/local/bin/start*.sh
+## 
+## 
+## # Extra stuff for pstat 115
+## # Install essentials
+## USER root
+## 
+## RUN apt-get update && \
+##     apt-get -y install clang && \
+##     apt-get purge && \
+##     apt-get clean && \
+##     rm -rf /var/lib/apt/lists/*
+## 
+## # Global site-wide config
+## RUN mkdir -p $HOME/.R/ \
+##     && echo "\nCXX=clang++ -ftemplate-depth-256\n" >> $HOME/.R/Makevars \
+##     && echo "CC=clang\n" >> $HOME/.R/Makevars
+## 
+## # Install rstan
+## RUN install2.r --error \
+##     inline \
+##     RcppEigen \
+##     StanHeaders \
+##     rstan \
+##     KernSmooth
+## 
+## # Config for rstudio user
+## RUN mkdir -p /home/rstudio/.R/ \
+##     && echo "\nCXX=clang++ -ftemplate-depth-256\n" >> /home/rstudio/.R/Makevars \
+##     && echo "CC=clang\n" >> /home/rstudio/.R/Makevars \
+##     && echo "CXXFLAGS=-O3\n" >> /home/rstudio/.R/Makevars \
+##     && echo "\nrstan::rstan_options(auto_write = TRUE)" >> /home/rstudio/.Rprofile \
+##     && echo "options(mc.cores = parallel::detectCores())" >> /home/rstudio/.Rprofile
+## 
+## RUN R -e "install.packages(c('rstanarm', 'coda', 'mvtnorm', 'loo', 'MCMCpack'), repos = 'http://cran.us.r-project.org')" && \
+##     R -e "devtools::install_github('rmcelreath/rethinking')"
+## 
+## RUN R -e "install.packages(c('hflights', 'tidytext', 'HDInterval', 'dendextend'), repos = 'http://cran.us.r-project.org')" && \
+##     R -e "devtools::install_github('bradleyboehmke/harrypotter')" && \
+##     R -e "devtools::install_github('rlbarter/superheat')"
+##     
+## USER root
+## RUN tlmgr update --self
+## RUN tlmgr install float mathtools
+## RUN tlmgr update --self
+## RUN tlmgr install collection-latexextra
+## 
+## 
+## RUN echo "* soft core 0" >> /etc/security/limits.conf \
+##     && echo "* hard core 0" >> /etc/security/limits.conf 
+## 
+## RUN echo "ulimit -c 0 > /dev/null 2>&1" > /etc/profile.d/disable-coredumps.sh
 
 USER ${NB_USER}
 CMD jupyter notebook --ip 0.0.0.0
