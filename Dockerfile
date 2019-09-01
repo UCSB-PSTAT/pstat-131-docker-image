@@ -64,7 +64,8 @@ RUN apt-get update && \
 # Global site-wide config
 RUN mkdir -p $HOME/.R/ \
     && echo "\nCXX=clang++ -ftemplate-depth-256\n" >> $HOME/.R/Makevars \
-    && echo "CC=clang\n" >> $HOME/.R/Makevars
+    && echo "CC=clang\n" >> $HOME/.R/Makevars \
+    && echo "CXXFLAGS += -std=c++11" >> ~/.R/Makevars
 
 RUN R -e "install.packages("rstan", repos = "https://cloud.r-project.org/", dependencies = TRUE)"
 
