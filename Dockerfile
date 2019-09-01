@@ -77,14 +77,14 @@ RUN R -e "install.packages('rstan', repos = 'https://cloud.r-project.org/', depe
 ##     rstan \
 ##     KernSmooth
 ## 
-## # Config for rstudio user
-## RUN mkdir -p /home/rstudio/.R/ \
-##     && echo "\nCXX=clang++ -ftemplate-depth-256\n" >> /home/rstudio/.R/Makevars \
-##     && echo "CC=clang\n" >> /home/rstudio/.R/Makevars \
-##     && echo "CXXFLAGS=-O3\n" >> /home/rstudio/.R/Makevars \
-##     && echo "\nrstan::rstan_options(auto_write = TRUE)" >> /home/rstudio/.Rprofile \
-##     && echo "options(mc.cores = parallel::detectCores())" >> /home/rstudio/.Rprofile
-## 
+# Config for rstudio user
+RUN mkdir -p /home/rstudio/.R/ \
+     && echo "\nCXX=clang++ -ftemplate-depth-256\n" >> /home/rstudio/.R/Makevars \
+     && echo "CC=clang\n" >> /home/rstudio/.R/Makevars \
+     && echo "CXXFLAGS=-O3\n" >> /home/rstudio/.R/Makevars \
+     && echo "\nrstan::rstan_options(auto_write = TRUE)" >> /home/rstudio/.Rprofile \
+     && echo "options(mc.cores = parallel::detectCores())" >> /home/rstudio/.Rprofile
+ 
 RUN R -e "install.packages(c('rstanarm', 'coda', 'mvtnorm', 'loo', 'MCMCpack'), repos = 'http://cran.us.r-project.org')"
 
 ## 
