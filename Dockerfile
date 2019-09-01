@@ -66,6 +66,8 @@ RUN mkdir -p $HOME/.R/ \
     && echo "\nCXX=clang++ -ftemplate-depth-256\n" >> $HOME/.R/Makevars \
     && echo "CC=clang\n" >> $HOME/.R/Makevars
 
+RUN R -e "install.packages("rstan", repos = "https://cloud.r-project.org/", dependencies = TRUE)"
+
 ## # Install rstan
 ## RUN install2.r --error \
 ##     inline \
