@@ -84,8 +84,8 @@ RUN R -e "install.packages("rstan", repos = "https://cloud.r-project.org/", depe
 ##     && echo "\nrstan::rstan_options(auto_write = TRUE)" >> /home/rstudio/.Rprofile \
 ##     && echo "options(mc.cores = parallel::detectCores())" >> /home/rstudio/.Rprofile
 ## 
-## RUN R -e "install.packages(c('rstanarm', 'coda', 'mvtnorm', 'loo', 'MCMCpack'), repos = 'http://cran.us.r-project.org')" && \
-##     R -e "devtools::install_github('rmcelreath/rethinking')"
+RUN R -e "install.packages(c('rstanarm', 'coda', 'mvtnorm', 'loo', 'MCMCpack'), repos = 'http://cran.us.r-project.org')"
+
 ## 
 RUN R -e "install.packages(c('hflights', 'tidytext', 'HDInterval', 'dendextend'), repos = 'http://cran.us.r-project.org')" && \
     R -e "devtools::install_github('bradleyboehmke/harrypotter')" && \
