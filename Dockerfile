@@ -67,7 +67,7 @@ RUN mkdir -p $HOME/.R/ \
     && echo "CC=clang\n" >> $HOME/.R/Makevars \
     && echo "CXXFLAGS += -std=c++11" >> ~/.R/Makevars
 
-RUN R -e "install.packages("rstan", repos = "https://cloud.r-project.org/", dependencies = TRUE)"
+RUN R -e "install.packages('rstan', repos = 'https://cloud.r-project.org/', dependencies = TRUE)"
 
 ## # Install rstan
 ## RUN install2.r --error \
