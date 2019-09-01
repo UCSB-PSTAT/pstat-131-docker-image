@@ -85,7 +85,7 @@ RUN mkdir -p /home/rstudio/.R/ \
      && echo "\nrstan::rstan_options(auto_write = TRUE)" >> /home/rstudio/.Rprofile \
      && echo "options(mc.cores = parallel::detectCores())" >> /home/rstudio/.Rprofile
  
-RUN R -e "install.packages(c('rstanarm', 'coda', 'mvtnorm', 'loo', 'MCMCpack'), repos = 'http://cran.us.r-project.org')"
+RUN R -e "install.packages(c('coda', 'mvtnorm', 'loo', 'MCMCpack'), repos = 'http://cran.us.r-project.org')"
 
 ## 
 RUN R -e "install.packages(c('hflights', 'tidytext', 'HDInterval', 'dendextend'), repos = 'http://cran.us.r-project.org')" && \
