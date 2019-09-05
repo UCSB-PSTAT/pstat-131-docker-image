@@ -156,7 +156,7 @@ IRkernel
 ## jupyter-core \
 ## jupyter-client
 
-USER ${NB_USER}
+
 
 RUN R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')"
 
@@ -178,5 +178,8 @@ RUN ["r", "install_stan.R"]
 RUN install2.r -s --error -r "https://cloud.r-project.org/" \
 rstantools \ 
 shinystan
+
+RUN sudo chmod -R 777 /home/rstudio/.local
+USER ${NB_USER}
 
 CMD jupyter notebook --ip 0.0.0.0
