@@ -1,105 +1,136 @@
-FROM rocker/verse:3.6.0
+FROM jupyter/r-notebook:latest
+ 
+LABEL maintainer="Patrick Windmiller <sysadmin@pstat.ucsb.edu>"
 
-ENV NB_USER rstudio
-ENV NB_UID 1000
-ENV VENV_DIR /srv/venv
-
-# Set ENV for all programs...
-ENV PATH ${VENV_DIR}/bin:$PATH
-# And set ENV for R! It doesn't read from the environment...
-RUN echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron
-
-# The `rsession` binary that is called by nbrsessionproxy to start R doesn't seem to start
-# without this being explicitly set
-ENV LD_LIBRARY_PATH /usr/local/lib/R/lib
-
-ENV HOME /home/${NB_USER}
-WORKDIR ${HOME}
-
-RUN apt-get update && \
-    apt-get -y install python3-venv python3-dev && \
-    apt-get purge && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Create a venv dir owned by unprivileged user & set up notebook in it
-# This allows non-root to install python libraries if required
-RUN mkdir -p ${VENV_DIR} && chown -R ${NB_USER} ${VENV_DIR}
-
-USER ${NB_USER}
-
-RUN python3 -m venv ${VENV_DIR} && \
-    # Explicitly install a new enough version of pip
-    pip3 install pip==9.0.1 && \
-    pip3 install --no-cache-dir \
-         notebook==5.2 \
-         jupyterhub==0.9.4 \
-         nbrsessionproxy==0.6.1 && \
-    jupyter serverextension enable --sys-prefix --py nbrsessionproxy && \
-    jupyter nbextension install    --sys-prefix --py nbrsessionproxy && \
-    jupyter nbextension enable     --sys-prefix --py nbrsessionproxy
-
-RUN R --quiet -e "devtools::install_github('IRkernel/IRkernel')" && \
-    R --quiet -e "IRkernel::installspec(prefix='${VENV_DIR}')"
-
-RUN R -e "install.packages(c('e1071', 'kableExtra', 'ggmap', 'Rtsne', 'NbClust', 'tree', 'maptree', 'glmnet', 'randomForest', 'ROCR', 'imager', 'ISLR', 'ggridges', 'plotmo'), repos = 'http://cran.us.r-project.org')" && \
-    R -e "devtools::install_github('gbm-developers/gbm3')"
-    
-RUN wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start.sh && \
-    wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start-singleuser.sh && \
-    wget -P /usr/local/bin https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/start-notebook.sh && \
-    chmod a+x /usr/local/bin/start*.sh
-
-
-# Extra stuff for pstat 115
-# Install essentials
 USER root
-
+RUN git clone https://github.com/TheLocehiliosan/yadm.git /usr/local/share/yadm && \
+    ln -s /usr/local/share/yadm/yadm /usr/local/bin/yadm
+ 
+RUN pip install nbgitpuller && \
+    jupyter serverextension enable --py nbgitpuller --sys-prefix
+ 
+RUN pip install jupyter-server-proxy jupyter-rsession-proxy
+ 
+## install R studio
 RUN apt-get update && \
-    apt-get -y install clang && \
-    apt-get purge && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Global site-wide config
-RUN mkdir -p $HOME/.R/ \
-    && echo "\nCXX=clang++ -ftemplate-depth-256\n" >> $HOME/.R/Makevars \
-    && echo "CC=clang\n" >> $HOME/.R/Makevars
-
-# Install rstan
+    curl --silent -L --fail https://s3.amazonaws.com/rstudio-ide-build/server/bionic/amd64/rstudio-server-1.2.1578-amd64.deb > /tmp/rstudio.deb && \
+    echo '81f72d5f986a776eee0f11e69a536fb7 /tmp/rstudio.deb' | md5sum -c - && \
+    apt-get install -y /tmp/rstudio.deb && \
+    rm /tmp/rstudio.deb && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && apt-get remove -y r-*
+ENV PATH=$PATH:/usr/lib/rstudio-server/bin
+ 
+ENV R_HOME=/opt/conda/lib/R
+ 
+## change littler defaults to conda R
+ARG LITTLER=$R_HOME/library/littler
+RUN echo "local({\n" \
+         "   r <- getOption('repos')\n" \
+         "   r['CRAN'] <- 'https://cloud.r-project.org'\n" \
+         "   options(repos = r)\n" \
+         "})\n" > $R_HOME/etc/Rprofile.site && \
+         \
+         R -e "install.packages(c('littler', 'docopt'))"
+RUN sed -i 's/\/usr\/local\/lib\/R\/site-library/\/opt\/conda\/lib\/R\/library/g' $LITTLER/examples/*.r && \
+        ln -s $LITTLER/bin/r $LITTLER/examples/*.r /usr/local/bin/ && \
+        echo "$R_HOME/lib" | sudo tee -a /etc/ld.so.conf.d/littler.conf && \
+        ldconfig
+ 
+# ggplot2 extensions
 RUN install2.r --error \
-    inline \
-    RcppEigen \
-    StanHeaders \
-    rstan \
-    KernSmooth
+GGally \
+ggridges \
+RColorBrewer \
+scales \
+viridis
+ 
+# Misc utilities
+RUN install2.r --error \
+beepr \
+config \
+doParallel \
+DT \
+foreach \
+formattable \
+glue \
+here \
+Hmisc \
+httr
+ 
+RUN install2.r --error \
+jsonlite \
+kableExtra \
+logging \
+MASS \
+microbenchmark \
+openxlsx \
+pkgdown \
+rlang
+ 
+RUN install2.r --error \
+RPushbullet \
+roxygen2 \
+stringr \
+styler \
+testthat \
+usethis  \
+ggridges \
+plotmo
+ 
+ 
+# Caret and some ML packages
+RUN install2.r --error \
+# ML framework
+caret \
+car \
+ensembleR \
+# metrics
+MLmetrics \
+pROC \
+ROCR \
+# Models
+Rtsne \
+NbClust
+ 
+RUN install2.r --error \
+tree \
+maptree \
+arm \
+e1071 \
+elasticnet \
+fitdistrplus \
+gam \
+gamlss \
+glmnet \
+lme4 \
+ltm \
+randomForest \
+rpart \
+# Data
+ISLR
 
-# Config for rstudio user
-RUN mkdir -p /home/rstudio/.R/ \
-    && echo "\nCXX=clang++ -ftemplate-depth-256\n" >> /home/rstudio/.R/Makevars \
-    && echo "CC=clang\n" >> /home/rstudio/.R/Makevars \
-    && echo "CXXFLAGS=-O3\n" >> /home/rstudio/.R/Makevars \
-    && echo "\nrstan::rstan_options(auto_write = TRUE)" >> /home/rstudio/.Rprofile \
-    && echo "options(mc.cores = parallel::detectCores())" >> /home/rstudio/.Rprofile
 
-RUN R -e "install.packages(c('rstanarm', 'coda', 'mvtnorm', 'loo', 'MCMCpack'), repos = 'http://cran.us.r-project.org')" && \
-    R -e "devtools::install_github('rmcelreath/rethinking')"
+RUN conda install -y -c conda-forge r-cairo && \
+    install2.r --error imager
+ 
+RUN installGithub.r \
+    gbm-developers/gbm3 \
+    bradleyboehmke/harrypotter && \
+    install2.r --error rstantools shinystan
 
-RUN R -e "install.packages(c('hflights', 'tidytext', 'HDInterval', 'dendextend'), repos = 'http://cran.us.r-project.org')" && \
-    R -e "devtools::install_github('bradleyboehmke/harrypotter')" && \
-    R -e "devtools::install_github('rlbarter/superheat')"
-    
-USER root
-RUN tlmgr update --self
-RUN tlmgr install float mathtools
-RUN tlmgr update --self
-RUN tlmgr install collection-latexextra
+# More Bayes stuff
 
+RUN install2.r --error \
+coda \
+loo \
+projpred \
+MCMCpack \
+hflights \
+HDInterval \
+tidytext \
+dendextend \
+LearnBayes
 
-RUN echo "* soft core 0" >> /etc/security/limits.conf \
-    && echo "* hard core 0" >> /etc/security/limits.conf 
+RUN R -e 'update.packages(ask = FALSE, checkBuilt = TRUE)'
 
-RUN echo "ulimit -c 0 > /dev/null 2>&1" > /etc/profile.d/disable-coredumps.sh
-
-USER ${NB_USER}
-CMD jupyter notebook --ip 0.0.0.0
+USER $NB_USER
