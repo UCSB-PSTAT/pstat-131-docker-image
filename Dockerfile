@@ -104,28 +104,4 @@ rpart \
 # Data
 ISLR
 
-
-RUN conda install -y -c conda-forge r-cairo libv8
-##    install2.r --error imager
- 
-# More Bayes stuff
-
-RUN install2.r --error \
-coda \
-loo \
-projpred \
-MCMCpack \
-hflights \
-HDInterval \
-tidytext \
-dendextend \
-LearnBayes \
-imager
-
-
-RUN installGithub.r \
-     gbm-developers/gbm3 \
-     bradleyboehmke/harrypotter
-RUN R -e "install.packages(c('rstantools', 'shinystan'))"
-
 USER $NB_USER
