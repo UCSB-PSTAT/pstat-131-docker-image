@@ -1,107 +1,64 @@
-FROM jupyter/r-notebook:6d42503c684f
- 
-LABEL maintainer="Alexander Franks <amfranks@ucsb.edu>"
+FROM ucsb/r-base:v20210120.1
+
+LABEL maintainer="Patrick Windmiller <windmiller@pstat.ucsb.edu>"
 
 USER root
-RUN git clone https://github.com/TheLocehiliosan/yadm.git /usr/local/share/yadm && \
-    ln -s /usr/local/share/yadm/yadm /usr/local/bin/yadm
- 
-RUN pip install nbgitpuller && \
-    jupyter serverextension enable --py nbgitpuller --sys-prefix
- 
-RUN pip install jupyter-server-proxy jupyter-rsession-proxy
- 
-## install R studio
-RUN apt-get update && \
-    curl --silent -L --fail https://s3.amazonaws.com/rstudio-ide-build/server/bionic/amd64/rstudio-server-1.2.1578-amd64.deb > /tmp/rstudio.deb && \
-    echo '81f72d5f986a776eee0f11e69a536fb7 /tmp/rstudio.deb' | md5sum -c - && \
-    apt-get install -y /tmp/rstudio.deb && \
-    rm /tmp/rstudio.deb && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* && apt-get remove -y r-*
-ENV PATH=$PATH:/usr/lib/rstudio-server/bin
- 
-ENV R_HOME=/opt/conda/lib/R
- 
-## change littler defaults to conda R
-ARG LITTLER=$R_HOME/library/littler
-RUN echo "local({r <- getOption('repos'); r['CRAN'] <- 'https://cloud.r-project.org';  options(repos = r)})" > $R_HOME/etc/Rprofile.site
 
-RUN R -e "install.packages(c('littler', 'docopt'))"
-RUN sed -i 's/\/usr\/local\/lib\/R\/site-library/\/opt\/conda\/lib\/R\/library/g' $LITTLER/examples/*.r && \
-        ln -s $LITTLER/bin/r $LITTLER/examples/*.r /usr/local/bin/ && \
-        echo "$R_HOME/lib" | sudo tee -a /etc/ld.so.conf.d/littler.conf && \
-        ldconfig
- 
-# ggplot2 extensions
-RUN install2.r --error \
-GGally \
-ggridges \
-RColorBrewer \
-scales \
-viridis
- 
-# Misc utilities
-RUN install2.r --error \
-beepr \
-config \
-doParallel \
-DT \
-foreach \
-formattable \
-glue \
-here \
-Hmisc \
-httr
- 
-RUN install2.r --error \
-jsonlite \
-kableExtra \
-logging \
-MASS \
-microbenchmark \
-openxlsx \
-rlang
- 
-RUN install2.r --error \
-RPushbullet \
-roxygen2 \
-stringr \
-styler \
-testthat \
-usethis  \
-ggridges \
-plotmo
- 
- 
-# Caret and some ML packages
-RUN install2.r --error \
-# ML framework
-caret \
-car \
-ensembleR \
-# metrics
-MLmetrics \
-pROC \
-ROCR \
-# Models
-Rtsne \
-NbClust
- 
-RUN install2.r --error \
-tree \
-maptree \
-arm \
-e1071 \
-elasticnet \
-fitdistrplus \
-gam \
-gamlss \
-glmnet \
-lme4 \
-ltm \
-randomForest \
-rpart \
-# Data
-ISLR
+#-- RSTAN
+#-- install rstan reqs
+RUN R -e "install.packages(c('inline','gridExtra','loo'))"
+#-- install rstan
+RUN R -e "dotR <- file.path(Sys.getenv('HOME'), '.R'); if(!file.exists(dotR)){ dir.create(dotR) }; Makevars <- file.path(dotR, 'Makevars'); if (!file.exists(Makevars)){  file.crea$
+RUN R -e "install.packages(c('ggplot2','StanHeaders'))"
+RUN R -e "packageurl <- 'http://cran.r-project.org/src/contrib/Archive/rstan/rstan_2.19.3.tar.gz'; install.packages(packageurl, repos = NULL, type = 'source')"
+
+#-- ggplot2 extensions
+RUN R -e "install.packages(c('GGally','ggridges','viridis'))"
+
+#-- Misc utilities
+RUN R -e "install.packages(c('beepr','config','tinytex','rmarkdown','formattable','here','Hmisc'))"
+
+RUN R -e "install.packages(c('kableExtra','logging','microbenchmark','openxlsx'))"
+
+RUN R -e "install.packages(c('RPushbullet','styler','ggridges','plotmo'))"
+
+RUN R -e "install.packages(c('nloptr'))"
+
+RUN R --vanilla -e "install.packages('minqa',repos='https://cloud.r-project.org', dependencies=TRUE)"
+
+#-- Caret and some ML packages
+#-- ML framework, metrics and Models
+RUN R -e "install.packages(c('codetools'))"
+RUN R --vanilla -e "install.packages('caret',repos='https://cloud.r-project.org')"
+RUN R -e "install.packages(c('car','ensembleR','MLmetrics','pROC','ROCR','Rtsne','NbClust'))"
+
+RUN apt-get update && apt-get install -y \
+    nano && \
+    apt-get clean && rm -rf /var/lib/lists/*
+
+RUN R -e "install.packages(c('tree','maptree','arm','e1071','elasticnet','fitdistrplus','gam','gamlss','glmnet','lme4','ltm','randomForest','rpart','ISLR'))"
+
+#-- More Bayes stuff
+RUN R -e "install.packages(c('coda','projpred','MCMCpack','hflights','HDInterval','tidytext','dendextend','LearnBayes'))"
+
+RUN R -e "install.packages(c('rstantools', 'shinystan'))"
+
+RUN R -e "install.packages(c('mvtnorm','dagitty','tidyverse'))"
+
+RUN R -e "devtools::install_github('rmcelreath/rethinking', upgrade = c('never'))"
+
+#-- Cairo
+#-- Cairo Requirements
+RUN apt-get update && apt-get install -y \
+    libpixman-1-dev \
+    libcairo2-dev \
+    libxt-dev && \
+    apt-get clean && rm -rf /var/lib/lists/*
+RUN R -e "install.packages(c('Cairo'))"
+
+#install nano editor
+RUN apt-get update && apt-get install -y \
+    nano && \
+    apt-get clean && rm -rf /var/lib/lists/*
 
 USER $NB_USER
